@@ -29,18 +29,18 @@ public class PdfGeneratorResource {
     @Produces(MediaType.TEXT_PLAIN)
     public String hello() throws IOException {
 
-        String templ = "<div>Hello World {name}</div>";
+        String templ = "<div>Hello World {name} <img src='flyingsaucer.png'/></div>";
         Template helloTemplate = engine.parse(templ);
         
+        System.out.println(PdfGeneratorResource.class.getResource("/").toExternalForm());
         String result = helloTemplate.data("name", "Jim").render(); 
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-
         PdfRendererBuilder builder = new PdfRendererBuilder();
         builder.useFastMode();
         //builder.withUri("file:///Users/me/Documents/pdf/in.htm");
-        builder.withHtmlContent(result, "/");
+        builder.withHtmlContent(result, PdfGeneratorResource.class.getResource("/images/").toExternalForm());
         builder.toStream(baos);
         builder.run();
 
