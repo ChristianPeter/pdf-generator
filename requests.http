@@ -1,1 +1,10 @@
 GET http://localhost:8080/pdf
+
+###
+POST http://localhost:8080/pdf
+Content-Type: application/json
+
+{
+    "template" : "<div>my template {name1}<div>{#for sample in list1}<p>{sample}</p>{/for}<span>done</span>",
+    "data" : {"name1" : "hello", "list1": [1,2,3]}
+}
