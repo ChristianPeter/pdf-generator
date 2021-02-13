@@ -55,15 +55,28 @@ public class PdfGeneratorResource {
     @POST
     @Produces(MediaType.TEXT_PLAIN)
     @Consumes(MediaType.APPLICATION_JSON)
-    public String pdfb64(PdfGeneratorRequest payload) {
+    public String pdfb64(PdfGeneratorRequest payload) throws IOException {
         System.out.println(payload.template);
         System.out.println(payload.data);
 
         Template helloTemplate = engine.parse(payload.template);
         
         String result = helloTemplate.data(payload.data).render(); 
-       
-        return result;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+        
+        PdfRendererBuilder builder = new PdfRendererBuilder();
+        builder.useFastMode();
+        //builder.withUri("file:///Users/me/Documents/pdf/in.htm");
+        builder.withHtmlContent(result, PdfGeneratorResource.class.getResource("/images/").toExternalForm());
+        builder.toStream(baos);
+        builder.run();
+
+        byte[] pdfdata = baos.toByteArray();
+
+        byte[] encode = Base64.getEncoder().encode(pdfdata);
+        
+        return new String(encode, StandardCharsets.UTF_8);
 
     }
     
