@@ -61,13 +61,13 @@
 
         .left-column {
             padding: .75rem;
-            max-width: 75%;
-            min-width: 55%;
+            max-width: 49%;
+            min-width: 30%;
         }
 
         .right-column {
             padding: .75rem;
-            max-width: 25%;
+            max-width: 49%;
         }
 
         .container {
@@ -172,7 +172,15 @@
         .guide-link:hover {
             background-color: #0d1c2c;
         }
+
+
+        #the-canvas {
+  border: 1px solid black;
+  direction: ltr;
+}
     </style>
+<script src="//mozilla.github.io/pdf.js/build/pdf.js"></script>
+
 </head>
 <body>
 
@@ -182,62 +190,124 @@
 
 <div class="container">
     <div class="left-column">
-        <p class="lead"> Congratulations, you have created a new Quarkus cloud application.</p>
-
-        <h2>Why do you see this?</h2>
-
-        <p>This page is served by Quarkus. The source is in
-            <code>src/main/resources/META-INF/resources/index.html</code>.</p>
-
-        <h2>What can I do from here?</h2>
-
-        <p>If not already done, run the application in <em>dev mode</em> using: <code>./mvnw compile quarkus:dev</code>.
-        </p>
-        <ul>
-            <li>Play with your example code in <code>src/main/java</code>:
-                <div class="examples">
-<div class="example">
-    <div class="example-header">
-        <h4>Qute example</h4>
-        <a href="https://quarkus.io/guides/qute" target="_blank" class="guide-link">Guide</a>
+        
+        <h2>html template</h2>
+        <textarea id="pdf-template" cols="60" rows="20"><div>
+    test{#for sample in list1}
+    <p>{sample}</p>
+    {/for}<img src='flyingsaucer.png'/>
+</div></textarea>
+            
+        
     </div>
-    <div class="example-description">
-        <p>This example uses a Qute template to render a subatomic-particle generator web page.</p>
-<p><b>Go subatomic!</b></p>
 
-    </div>
-    <div class="example-paths">
-        <a href="/qute/quarks" class="path-link" target="_blank">GET /qute/quarks</a>
-    </div>
-</div>
-
-                </div>
-            </li>
-            <li>Your static assets are located in <code>src/main/resources/META-INF/resources</code>.</li>
-            <li>Configure your application in <code>src/main/resources/application.properties</code>.</li>
-        </ul>
-        <h2>Do you like Quarkus?</h2>
-        <p>Go give it a star on <a href="https://github.com/quarkusio/quarkus">GitHub</a>.</p>
-    </div>
     <div class="right-column">
-        <div class="right-section">
-            <h3>Application</h3>
-            <ul>
-                <li>GroupId: org.ptec</li>
-                <li>ArtifactId: pdf-generator</li>
-                <li>Version: 1.0.0-SNAPSHOT</li>
-                <li>Quarkus Version: 1.11.1.Final</li>
-            </ul>
-        </div>
-        <div class="right-section">
-            <h3>Next steps</h3>
-            <ul>
-                <li><a href="https://quarkus.io/guides/maven-tooling.html" target="_blank">Setup your IDE</a></li>
-                <li><a href="https://quarkus.io/guides/getting-started.html" target="_blank">Getting started</a></li>
-                <li><a href="https://quarkus.io" target="_blank">Quarkus Web Site</a></li>
-            </ul>
-        </div>
+        <h2>Json data</h2>
+        <textarea id="pdf-data" cols="60" rows="20">{
+    "name1" : "hello", 
+    "list1": [1,2,3]
+}</textarea>
+    </div>
+
+
+
+   
+            
+</div>
+<div class="container">
+    <div class="left-column">
+        <h2>pdf output <button onclick="update()">refresh</button></h2>
+        <canvas id="the-canvas"></canvas>
     </div>
 </div>
+<script>
+
+async function update() {
+    const b64pdf = loadPdf();
+
+}
+
+async function loadPdf() {
+
+    const data = { template : document.getElementById('pdf-template').value, data : JSON.parse(document.getElementById('pdf-data').value)};
+
+    console.log(data);
+    const pdfB64 = await fetch('/pdf', {
+        method: 'POST',
+        mode: 'cors', // no-cors, *cors, same-origin
+        cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+        credentials: 'same-origin', // include, *same-origin, omit
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        redirect: 'follow', // manual, *follow, error
+        referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+        body: JSON.stringify(data) // body data type must match "Content-Type" header
+    }
+  );
+
+
+}
+
+
+
+    // atob() is used to convert base64 encoded PDF to binary-like data.
+// (See also https://developer.mozilla.org/en-US/docs/Web/API/WindowBase64/
+// Base64_encoding_and_decoding.)
+var pdfData = atob(
+  'JVBERi0xLjcKCjEgMCBvYmogICUgZW50cnkgcG9pbnQKPDwKICAvVHlwZSAvQ2F0YWxvZwog' +
+  'IC9QYWdlcyAyIDAgUgo+PgplbmRvYmoKCjIgMCBvYmoKPDwKICAvVHlwZSAvUGFnZXMKICAv' +
+  'TWVkaWFCb3ggWyAwIDAgMjAwIDIwMCBdCiAgL0NvdW50IDEKICAvS2lkcyBbIDMgMCBSIF0K' +
+  'Pj4KZW5kb2JqCgozIDAgb2JqCjw8CiAgL1R5cGUgL1BhZ2UKICAvUGFyZW50IDIgMCBSCiAg' +
+  'L1Jlc291cmNlcyA8PAogICAgL0ZvbnQgPDwKICAgICAgL0YxIDQgMCBSIAogICAgPj4KICA+' +
+  'PgogIC9Db250ZW50cyA1IDAgUgo+PgplbmRvYmoKCjQgMCBvYmoKPDwKICAvVHlwZSAvRm9u' +
+  'dAogIC9TdWJ0eXBlIC9UeXBlMQogIC9CYXNlRm9udCAvVGltZXMtUm9tYW4KPj4KZW5kb2Jq' +
+  'Cgo1IDAgb2JqICAlIHBhZ2UgY29udGVudAo8PAogIC9MZW5ndGggNDQKPj4Kc3RyZWFtCkJU' +
+  'CjcwIDUwIFRECi9GMSAxMiBUZgooSGVsbG8sIHdvcmxkISkgVGoKRVQKZW5kc3RyZWFtCmVu' +
+  'ZG9iagoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4g' +
+  'CjAwMDAwMDAwNzkgMDAwMDAgbiAKMDAwMDAwMDE3MyAwMDAwMCBuIAowMDAwMDAwMzAxIDAw' +
+  'MDAwIG4gCjAwMDAwMDAzODAgMDAwMDAgbiAKdHJhaWxlcgo8PAogIC9TaXplIDYKICAvUm9v' +
+  'dCAxIDAgUgo+PgpzdGFydHhyZWYKNDkyCiUlRU9G');
+
+// Loaded via <script> tag, create shortcut to access PDF.js exports.
+var pdfjsLib = window['pdfjs-dist/build/pdf'];
+
+// The workerSrc property shall be specified.
+pdfjsLib.GlobalWorkerOptions.workerSrc = '//mozilla.github.io/pdf.js/build/pdf.worker.js';
+
+// Using DocumentInitParameters object to load binary data.
+var loadingTask = pdfjsLib.getDocument({data: pdfData});
+loadingTask.promise.then(function(pdf) {
+  console.log('PDF loaded');
+  
+  // Fetch the first page
+  var pageNumber = 1;
+  pdf.getPage(pageNumber).then(function(page) {
+    console.log('Page loaded');
+    
+    var scale = 1.5;
+    var viewport = page.getViewport({scale: scale});
+
+    // Prepare canvas using PDF page dimensions
+    var canvas = document.getElementById('the-canvas');
+    var context = canvas.getContext('2d');
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+
+    // Render PDF page into canvas context
+    var renderContext = {
+      canvasContext: context,
+      viewport: viewport
+    };
+    var renderTask = page.render(renderContext);
+    renderTask.promise.then(function () {
+      console.log('Page rendered');
+    });
+  });
+}, function (reason) {
+  // PDF loading error
+  console.error(reason);
+});
+</script>
 </body>
 </html>
