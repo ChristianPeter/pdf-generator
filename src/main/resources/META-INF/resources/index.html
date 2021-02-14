@@ -2,6 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="pragma" content="no-cache" />
+
     <title>pdf-generator - 1.0.0-SNAPSHOT</title>
     <style>
         h1, h2, h3, h4, h5, h6 {
@@ -189,10 +192,28 @@
 </div>
 
 <div class="container">
+
+    <div class="left-column">
+        <h2>html template</h2>
+        <select id="template-select" onchange="selectTemplate(event)">
+            <option></option>
+            <option>borderradius</option>
+            <option>report</option>
+        </select>
+    </div>
+
+    <div class="right-column">
+        <h2>Json data</h2>
+        <select id="data-select" onchange="selectData(event)">
+            <option></option>
+        </select>
+    </div>
+</div>
+
+<div class="container">
     <div class="left-column">
         
-        <h2>html template</h2>
-        <textarea id="pdf-template" cols="60" rows="20"><div>
+        <textarea id="pdf-template" cols="40" rows="20"><div>
     test{#for sample in list1}
     <p>{sample}</p>
     {/for}<img src='flyingsaucer.png'/>
@@ -202,8 +223,7 @@
     </div>
 
     <div class="right-column">
-        <h2>Json data</h2>
-        <textarea id="pdf-data" cols="60" rows="20">{
+        <textarea id="pdf-data" cols="40" rows="20">{
     "name1" : "hello", 
     "list1": [1,2,3]
 }</textarea>
@@ -220,6 +240,9 @@
         <canvas id="the-canvas"></canvas>
     </div>
 </div>
+
+<textarea id="demo"></textarea>
+<button onclick="convertDemo()">demo</button>
 <script>
 
 async function update() {
@@ -313,6 +336,55 @@ var pdfjsLib = window['pdfjs-dist/build/pdf'];
 pdfjsLib.GlobalWorkerOptions.workerSrc = '//mozilla.github.io/pdf.js/build/pdf.worker.js';
 
 
+
+
+function debounce(func, wait, immediate) {
+	var timeout;
+	return function() {
+		var context = this, args = arguments;
+		var later = function() {
+			timeout = null;
+			if (!immediate) func.apply(context, args);
+		};
+		var callNow = immediate && !timeout;
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
+		if (callNow) func.apply(context, args);
+	};
+};
+
+var changeHandler = debounce(function() {
+    console.log('changed');
+    update();
+}, 1000);
+
+document.getElementById('pdf-template').addEventListener('keyup', changeHandler);
+
+document.getElementById('pdf-data').addEventListener('keyup', changeHandler);
+
+
+
+
+const exampleTemplates = [];
+exampleTemplates.push({name: 'borderradius', data: unescape('%3Chtml%3E%0A%3Chead%3E%0A%3Cstyle%3E%0A@page%20%7B%0A%20%20size%3A%20200px%20300px%3B%0A%20%20margin%3A%200%3B%0A%20%20padding%3A%200%3B%0A%7D%0Abody%20%7B%0A%20%20padding%3A%200%3B%0A%20%20margin%3A%200%3B%0A%7D%0Adiv%20%7B%0A%20%20margin%3A%2010px%3B%0A%20%20width%3A%20150px%3B%0A%20%20height%3A%2040px%3B%0A%20%20background-color%3A%20blue%3B%0A%7D%0A.one%20%7B%0A%20%20/*%20no%20border%20*/%0A%20%20border-radius%3A%2010px%3B%0A%7D%0A.two%20%7B%0A%20%20/*%20with-border%20*/%0A%20%20border-radius%3A%208px%3B%0A%20%20border%3A%202px%20solid%20red%3B%0A%7D%0A.three%20%7B%0A%20%20/*%20multiple%20value%20syntax%20*/%0A%20%20border-radius%3A%2020px%205px%3B%0A%7D%0A.four%20%7B%0A%20%20/*%20individual%20corner%20*/%0A%20%20border-top-left-radius%3A%2020px%2010px%3B%0A%7D%0A%3C/style%3E%0A%3C/head%3E%0A%3Cbody%3E%0A%3Cdiv%20class%3D%22one%22%3E%3C/div%3E%0A%3Cdiv%20class%3D%22two%22%3E%3C/div%3E%0A%3Cdiv%20class%3D%22three%22%3E%3C/div%3E%0A%3Cdiv%20class%3D%22four%22%3E%3C/div%3E%0A%3C/body%3E%0A%3C/html%3E')});
+exampleTemplates.push({name: 'report', data: unescape('%3C%3Fxml%20version%3D%221.0%22%20encoding%3D%22UTF-8%22%3F%3E%0A%3Chtml%20xmlns%3D%22http%3A//www.w3.org/1999/xhtml%22%20xml%3Alang%3D%22en%22%20lang%3D%22en%22%3E%0A%3Chead%3E%0A%20%20%20%20%3Ctitle%3EFlying%20Saucer%3A%20Tables%20Support%3C/title%3E%0A%0A%0A%20%20%20%20%3Cstyle%20type%3D%22text/css%22%3E%0A%0A@page%20%7B%0A%20%20%20%20background-color%3A%20white%3B%0A%7D%0A%0A.left-link%20%7B%0A%20%20%20%20display%3A%20none%3B%0A%7D%0A%0A.right-link%20%7B%0A%20%20%20%20display%3A%20none%3B%0A%7D%0A%0Abody%20%7B%0A%20%20%20%20background%3A%20white%3B%0A%20%20%20%20margin%3A%2010px%3B%0A%7D%0A%20%20%20%20%20%20%20%20body%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20padding%3A%2030px%3B%0A%20%20%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20%20%20h1%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20font-family%3A%20%22Century%20Gothic%22%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20text-align%3A%20right%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20font-weight%3A%20normal%3B%0A%20%20%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20%20%20h2%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20font-size%3A%20100%25%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20font-style%3A%20italic%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20font-weight%3A%20normal%3B%0A%20%20%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20%20%20table%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20border%3A%201px%20solid%20gray%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20width%3A%20100%25%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20border-collapse%3A%20separate%3B%0A%20%20%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20%20%20caption%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20border%3A%201px%20solid%20gray%3B%0A%20%20%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20%20%20td%2C%20th%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20border%3A%200px%20solid%20black%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20text-align%3A%20right%3B%0A%20%20%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20%20%20td.desc%2C%20th%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20text-align%3A%20left%3B%0A%20%20%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20%20%20tr.odd%20td%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20background-color%3A%20%23ccccff%3B%0A%20%20%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20%20%20tr.even%20td%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20background-color%3A%20transparent%3B%0A%20%20%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20%20%20tr.totals%20td.total%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20background-color%3A%20%23ccccff%3B%0A%20%20%20%20%20%20%20%20%7D%0A%0A%20%20%20%20%20%20%20%20table%23overview%20td%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20border%3A%201px%20solid%20gray%3B%0A%20%20%20%20%20%20%20%20%20%20%20%20padding%3A%205px%3B%0A%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%3C/style%3E%0A%3C/head%3E%0A%3Cbody%3E%0A%3Cp%20class%3D%22link%20left-link%22%3E%3Ca%20href%3D%22demoNav%3Aback%22%3EPrevious%20Page%3C/a%3E%3C/p%3E%0A%0A%3Cp%20class%3D%22link%20right-link%22%3E%3Ca%20href%3D%22demoNav%3Aforward%22%3ENext%20Page%3C/a%3E%3C/p%3E%0A%0A%3Cp%20id%3D%22fslogo%22%3EFlying%20Saucer%20XML/CSS2%20Renderer%3C/p%3E%0A%0A%3Cdiv%20style%3D%22width%3A%20100%25%22%3E%0A%20%20%20%20%3Ctable%20id%3D%22overview%22%20cellspacing%3D%220%22%20cellpadding%3D%220%22%20style%3D%22border%3A%200px%3B%20width%3A%20100%25%3B%22%20border%3D%221%22%3E%0A%20%20%20%20%20%20%20%20%3Ctr%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Ctd%20style%3D%22text-align%3A%20left%3B%20padding-bottom%3A%2010px%3B%22%3E%3Cspan%20id%3D%22pagebyline%22%3ETables%20Support%3C/span%3E%3C/td%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Ctd%3E%0A%09%09%09%09%3Ctable%20style%3D%22border-collapse%3A%20collapse%3B%22%3E%0A%09%09%09%09%09%3Ctr%3E%0A%09%09%09%09%09%09%3Ctd%20style%3D%22font-size%3A%20x-small%3B%22%3Ethead%21%3C/td%3E%0A%09%09%09%09%09%09%3Ctd%20style%3D%22font-size%3A%20x-small%3B%22%3Etfoot%21%3C/td%3E%0A%09%09%09%09%09%3C/tr%3E%0A%09%09%09%09%09%3Ctr%3E%0A%09%09%09%09%09%09%3Ctd%3E%0A%09%09%09%09%09%09%3Ctable%20style%3D%22border-collapse%3A%20collapse%3B%22%3E%0A%09%09%09%09%09%09%09%3Ctr%3E%0A%09%09%09%09%09%09%09%09%3Ctd%20style%3D%22font-size%3A%20x-small%3B%22%3Etbody%21%3C/td%3E%0A%09%09%09%09%09%09%09%09%3Ctd%3E%0A%09%09%09%09%09%09%09%09%3Ctable%20style%3D%22border-collapse%3A%20collapse%3B%22%3E%0A%09%09%09%09%09%09%09%09%3Ctr%3E%0A%09%09%09%09%09%09%09%09%09%3Ctd%20style%3D%22font-size%3A%20x-small%3B%22%3Eth%2C%20tr%2C%20td%21%3C/td%3E%0A%09%09%09%09%09%09%09%09%09%3Ctd%20style%3D%22font-size%3A%20x-small%3B%22%3Ealignment%3C/td%3E%0A%09%09%09%09%09%09%09%09%09%3Ctd%20style%3D%22font-size%3A%20x-small%3B%22%3Ecollapse%21%3C/td%3E%0A%09%09%09%09%09%09%09%09%3C/tr%3E%0A%09%09%09%09%09%09%09%09%09%3Ctr%3E%0A%09%09%09%09%09%09%09%09%09%09%3Ctd%20colspan%3D%223%22%3Ecolspan%21%3C/td%3E%0A%09%09%09%09%09%09%09%09%09%3C/tr%3E%0A%09%09%09%09%09%09%09%09%3C/table%3E%0A%09%09%09%09%09%09%09%09%3C/td%3E%0A%09%09%09%09%09%09%09%3C/tr%3E%0A%09%09%09%09%09%09%3C/table%3E%0A%09%09%09%09%09%09%3C/td%3E%0A%09%09%09%09%09%3C/tr%3E%0A%09%09%09%09%09%3Ctr%3E%0A%09%09%09%09%09%3Ctd%20colspan%3D%223%22%20style%3D%22font-size%3A%20x-small%3B%20font-weight%3A%20bold%3B%22%3Estyles%21%3C/td%3E%0A%09%09%09%09%09%3C/tr%3E%0A%0A%09%09%09%09%3C/table%3E%0A%09%09%09%3C/td%3E%0A%20%20%20%20%20%20%20%20%3C/tr%3E%0A%09%09%3Ctr%3E%0A%09%09%09%3Ctd%20style%3D%22text-align%3A%20right%3B%20vertical-align%3A%20top%3B%22%3E%3Cb%3ETables%20support%20includes%3C/b%3E%3A%3C/td%3E%0A%09%09%09%3Ctd%20style%3D%22text-align%3A%20left%3B%20vertical-align%3A%20top%22%3ETables%20support%20is%20pretty%20complete%20at%20this%20point.%20We%0A%09%09%09%09support%20all%20the%20table-related%20XHTML%20tags%2C%20including%20table%2C%20caption%2C%20tbody%2C%20thead%2C%20tfoot%2C%20th%2C%20tr%20and%20td%0A%09%09%09%09tags.%20Table%20elements%20can%20have%20styles%20attached%20to%20them--in%20this%20demo%2C%20to%20show%20an%20alternating%20row%0A%09%09%09%09highlight%20color.%20In-cell%20alignment%20works%2C%20as%20do%20borders%20and%20border-collapse.%20Colspan%2C%20rowspan%2C%0A%09%09%09%09cellpadding%20and%20cellspacing%20attributes%20are%20supported.%20Table%20and%20column%20widths%20can%20be%20set%20to%20a%0A%09%09%09%09specific%20or%20proportional%20%28em%2C%20%25%29%20value.%20Also%20included%3A%20complex%20nested%20table%20%0A%09%09%09%09layouts%2C%20auto%20layout%2C%20floated%20tables%2C%20and%20vertical%20alignment%20within%20cells.%0A%09%09%09%3C/td%3E%0A%09%09%3C/tr%3E%0A%09%3C/table%3E%0A%3C/div%3E%0A%3Cbr/%3E%0A%0A%3Ch1%3EA%20Sample%20Report%3C/h1%3E%0A%0A%3Ch2%3Eassembled%20by%20Ali%20Enn%3C/h2%3E%0A%0A%3Ctable%3E%0A%20%20%20%20%3Ccaption%3E3rd%20Qtr%20Financial%20Results%3C/caption%3E%0A%20%20%20%20%3Cthead%3E%0A%20%20%20%20%20%20%20%20%3Ctr%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cth%20style%3D%22text-align%3A%20left%3B%22%3EDepartment%3C/th%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cth%20style%3D%22text-align%3A%20right%3B%22%3EGross%20Sales%3C/th%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cth%20style%3D%22text-align%3A%20right%3B%22%3EExpenses%3C/th%3E%0A%20%20%20%20%20%20%20%20%20%20%20%20%3Cth%20style%3D%22text-align%3A%20right%3B%22%3ENet%20Profit%3C/th%3E%0A%20%20%20%20%20%20%20%20%3C/tr%3E%0A%20%20%20%20%3C/thead%3E%0A%20%20%20%20%3Ctfoot%3E%0A%20%20%20%20%3Ctr%20class%3D%22totals%22%3E%0A%20%20%20%20%20%20%20%20%3Ctd%20class%3D%22total%22%20colspan%3D%224%22%3E1%2C000%2C000.00%3C/td%3E%0A%20%20%20%20%3C/tr%3E%0A%20%20%20%20%3C/tfoot%3E%0A%20%20%20%20%3Ctbody%3E%0A%20%20%20%20%3Ctr%20class%3D%22odd%22%3E%0A%20%20%20%20%20%20%20%20%3Ctd%20class%3D%22desc%22%20style%3D%22vertical-align%3A%20top%3B%22%20rowspan%3D%226%22%3EPets%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E12345.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E1020.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E9000.00%3C/td%3E%0A%20%20%20%20%3C/tr%3E%0A%20%20%20%20%3Ctr%20class%3D%22even%22%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E12345.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E1020.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E9000.00%3C/td%3E%0A%20%20%20%20%3C/tr%3E%0A%20%20%20%20%3Ctr%20class%3D%22odd%22%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E12345.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E1020.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E9000.00%3C/td%3E%0A%20%20%20%20%3C/tr%3E%0A%20%20%20%20%3Ctr%20class%3D%22even%22%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E12345.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E1020.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E9000.00%3C/td%3E%0A%20%20%20%20%3C/tr%3E%0A%0A%20%20%20%20%3Ctr%20class%3D%22odd%22%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E12345.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E1020.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E9000.00%3C/td%3E%0A%20%20%20%20%3C/tr%3E%0A%20%20%20%20%3Ctr%20class%3D%22even%22%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E12345.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E1020.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E9000.00%3C/td%3E%0A%20%20%20%20%3C/tr%3E%0A%0A%20%20%20%20%3Ctr%20class%3D%22odd%22%3E%0A%20%20%20%20%20%20%20%20%3Ctd%20class%3D%22desc%22%20style%3D%22vertical-align%3A%20top%3B%22%20rowspan%3D%227%22%3EGardening%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E12345.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E1020.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E9000.00%3C/td%3E%0A%20%20%20%20%3C/tr%3E%0A%20%20%20%20%3Ctr%20class%3D%22even%22%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E12345.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E1020.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E9000.00%3C/td%3E%0A%20%20%20%20%3C/tr%3E%0A%0A%20%20%20%20%3Ctr%20class%3D%22odd%22%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E12345.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E1020.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E9000.00%3C/td%3E%0A%20%20%20%20%3C/tr%3E%0A%20%20%20%20%3Ctr%20class%3D%22even%22%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E12345.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E1020.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E9000.00%3C/td%3E%0A%20%20%20%20%3C/tr%3E%0A%0A%20%20%20%20%3Ctr%20class%3D%22odd%22%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E12345.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E1020.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E9000.00%3C/td%3E%0A%20%20%20%20%3C/tr%3E%0A%20%20%20%20%3Ctr%20class%3D%22even%22%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E12345.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E1020.00%3C/td%3E%0A%20%20%20%20%20%20%20%20%3Ctd%3E9000.00%3C/td%3E%0A%20%20%20%20%3C/tr%3E%0A%20%20%20%20%3C/tbody%3E%0A%3C/table%3E%0A%3C/body%3E%0A%3C/html%3E')});
+function selectTemplate(event) {
+    console.log('select template', event.target.value);
+    exampleTemplates.forEach(element => {
+        if (event.target.value === element.name) {
+            console.log('found template', element);
+            document.getElementById('pdf-template').value = element.data;
+        }
+    });
+
+}
+
+function convertDemo() {
+    const data1 = document.getElementById('demo').value;
+    console.log(escape(data1));
+}
 </script>
+
+
 </body>
 </html>
